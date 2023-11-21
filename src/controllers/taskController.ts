@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
-import Task from '../models/taskModel.js';
+import Task, { TaskType } from '../models/taskModel.js';
 import validadeMongobdid from '../utils/validateMongodbid.js';
 
 
@@ -47,6 +47,27 @@ const getTask = asyncHandler(async (req: Request, res: Response) => {
         const getTask = await Task.findById(id);
         res.json({ getTask });
     } catch(error) {
+        return res.status(400).json({ error: "get error" });
+    }
+});
+
+const getTaskByDate = asyncHandler(async (req: Request, res: Response) => {
+    const { date } = req.params;
+    const formatedDate = new Date(date).toDateString();
+    try {
+        const getTask = await Task.find();
+        const tasksArray = getTask.filter((item: any) => {
+            if(new Date(item.createdAt).toDateString() === formatedDate) {
+                console.log(item)
+                return item;
+            } else {
+                return;
+            }
+        })
+        /*.where("createdAt").equals(date);*/
+        res.json({ tasksArray });
+    } catch(error) {
+        console.error(error);
         return res.status(400).json({ error: "get error" });
     }
 });
@@ -106,4 +127,4 @@ const deleteTask = asyncHandler(async (req: Request, res: Response) => {
       }
 });
 
-export { createTask, updateTask, getTask, deleteTask, getAllTask };
+export { createTask, updateTask, getTask, getTaskByDate, deleteTask, getAllTask };
