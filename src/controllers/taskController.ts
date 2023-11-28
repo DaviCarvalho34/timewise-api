@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import Task, { TaskType } from '../models/taskModel.js';
+import Score from '../models/scoreModel.js';
 import validadeMongobdid from '../utils/validateMongodbid.js';
+import scoreModel from '../models/scoreModel.js';
 
 
 const createTask = asyncHandler(async (req: Request, res: Response) => {
@@ -33,6 +35,8 @@ const updateTask = asyncHandler(async (req: Request, res: Response) => {
                 new: true,
             }
         );
+
+        
         res.json(updateTask);
     } catch(error) {
         return res.status(400).json({ error: "update error" });
@@ -127,4 +131,16 @@ const deleteTask = asyncHandler(async (req: Request, res: Response) => {
       }
 });
 
-export { createTask, updateTask, getTask, getTaskByDate, deleteTask, getAllTask };
+const sumPontuation = asyncHandler(async (req: Request, res: Response) => {
+    try {       
+        const tasks = await Task.find({ status: true });
+        const totalScore = tasks.reduce((acc, task) => acc + task.pontuation, 0);
+
+        res.json({ totalScore });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+})
+
+export { createTask, updateTask, getTask, getTaskByDate, deleteTask, getAllTask, sumPontuation };
